@@ -256,6 +256,7 @@ const HomePage = () => {
             <Nav.Link 
               active={activeTab === 'all'} 
               onClick={() => setActiveTab('all')}
+              style={{backgroundColor: 'black',color:"white"}}
             >
               All Items
             </Nav.Link>

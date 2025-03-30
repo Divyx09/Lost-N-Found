@@ -147,7 +147,7 @@ const UserDashboard = () => {
       const itemData = {
         itemName: data.name,
         itemDescription: data.description,
-        status: "found",
+        status: data.type,
         category: data.category,
         reportType: data.type,
         location: data.location,
@@ -741,6 +741,7 @@ const UserDashboard = () => {
             variant="outline-primary" 
             onClick={addQuestion}
             className="w-100"
+            style={{ backgroundColor: '#1a365d', borderColor: '#1a365d' ,color:"white"}}
           >
             <i className="bi bi-plus-circle me-2"></i>
             Add Another Question
@@ -769,17 +770,17 @@ const UserDashboard = () => {
     );
   };
 
-  const name = localStorage.getItem("name")
+  // const user = localStorage.getItem("user")
 
   return (
     <>
-     
-
       <Container className="py-4">
         <Row className="mb-4">
           <Col>
             <h1>My Dashboard</h1>
-            <p>Welcome back, {name}!</p>
+            <p>
+              Welcome back,
+            </p>
           </Col>
           <Col xs="auto">
             <Button onClick={() => handleShowModal()}>Report New Item</Button>
@@ -797,7 +798,6 @@ const UserDashboard = () => {
             <Nav.Item>
               <Nav.Link eventKey="myItems">My Reported Items</Nav.Link>
             </Nav.Item>
-            
           </Nav>
 
           <Tab.Content>
@@ -808,20 +808,28 @@ const UserDashboard = () => {
                     <h4>My Reported Items</h4>
                     <div className="d-flex gap-2">
                       <Button
-                        variant={activeFilter === 'all' ? 'primary' : 'outline-primary'}
-                        onClick={() => handleFilter('all')}
+                        variant={
+                          activeFilter === "all" ? "primary" : "outline-primary"
+                        }
+                        onClick={() => handleFilter("all")}
                       >
                         All Items
                       </Button>
                       <Button
-                        variant={activeFilter === 'lost' ? 'danger' : 'outline-danger'}
-                        onClick={() => handleFilter('lost')}
+                        variant={
+                          activeFilter === "lost" ? "danger" : "outline-danger"
+                        }
+                        onClick={() => handleFilter("lost")}
                       >
                         Lost Items
                       </Button>
                       <Button
-                        variant={activeFilter === 'found' ? 'success' : 'outline-success'}
-                        onClick={() => handleFilter('found')}
+                        variant={
+                          activeFilter === "found"
+                            ? "success"
+                            : "outline-success"
+                        }
+                        onClick={() => handleFilter("found")}
                       >
                         Found Items
                       </Button>
@@ -831,7 +839,7 @@ const UserDashboard = () => {
                 <Card.Body>
                   {filteredItems.length === 0 ? (
                     <Alert variant="info">
-                      {activeFilter === 'all' 
+                      {activeFilter === "all"
                         ? "You haven't reported any items yet."
                         : `No ${activeFilter} items reported.`}
                     </Alert>
@@ -839,11 +847,13 @@ const UserDashboard = () => {
                     <>
                       <div className="mb-3">
                         <small className="text-muted">
-                          Showing {filteredItems.length} {activeFilter === 'all' ? 'total' : activeFilter} items
+                          Showing {filteredItems.length}{" "}
+                          {activeFilter === "all" ? "total" : activeFilter}{" "}
+                          items
                         </small>
                       </div>
                       <Row xs={1} md={2} lg={3} className="g-4">
-                        {filteredItems.map(item => renderItemCard(item))}
+                        {filteredItems.map((item) => renderItemCard(item))}
                       </Row>
                     </>
                   )}
@@ -861,7 +871,7 @@ const UserDashboard = () => {
                     <Alert variant="info">No lost items found.</Alert>
                   ) : (
                     <Row xs={1} md={2} lg={3} className="g-4">
-                      {lostItems.map(item => renderItemCard(item))}
+                      {lostItems.map((item) => renderItemCard(item))}
                     </Row>
                   )}
                 </Card.Body>
@@ -878,7 +888,7 @@ const UserDashboard = () => {
                     <Alert variant="info">No found items available.</Alert>
                   ) : (
                     <Row xs={1} md={2} lg={3} className="g-4">
-                      {foundItems.map(item => renderItemCard(item))}
+                      {foundItems.map((item) => renderItemCard(item))}
                     </Row>
                   )}
                 </Card.Body>
@@ -954,7 +964,9 @@ const UserDashboard = () => {
                 <Form.Label>Location</Form.Label>
                 <Form.Control
                   type="text"
-                  {...register("location", { required: "Location is required" })}
+                  {...register("location", {
+                    required: "Location is required",
+                  })}
                   isInvalid={!!errors.location}
                   placeholder="Enter location"
                 />
@@ -997,8 +1009,8 @@ const UserDashboard = () => {
         <SecurityQuestionsModal />
 
         {/* Claim Modal with React Hook Form */}
-        <Modal 
-          show={showClaimModal} 
+        <Modal
+          show={showClaimModal}
           onHide={() => {
             setShowClaimModal(false);
             claimReset();
@@ -1009,14 +1021,20 @@ const UserDashboard = () => {
             <Modal.Header closeButton>
               <Modal.Title>Answer Security Questions</Modal.Title>
             </Modal.Header>
-            
+
             <Modal.Body>
               {selectedClaimItem && (
                 <div className="mb-4">
                   <h6>Item Details:</h6>
-                  <p className="mb-1"><strong>Name:</strong> {selectedClaimItem.name}</p>
-                  <p className="mb-1"><strong>Category:</strong> {selectedClaimItem.category}</p>
-                  <p className="mb-1"><strong>Location:</strong> {selectedClaimItem.location}</p>
+                  <p className="mb-1">
+                    <strong>Name:</strong> {selectedClaimItem.name}
+                  </p>
+                  <p className="mb-1">
+                    <strong>Category:</strong> {selectedClaimItem.category}
+                  </p>
+                  <p className="mb-1">
+                    <strong>Location:</strong> {selectedClaimItem.location}
+                  </p>
                 </div>
               )}
 
@@ -1026,8 +1044,8 @@ const UserDashboard = () => {
                     <strong>{question.question}</strong>
                   </Form.Label>
                   <Form.Control
-                    {...claimRegister(`answer_${question._id}`, { 
-                      required: "This answer is required" 
+                    {...claimRegister(`answer_${question._id}`, {
+                      required: "This answer is required",
                     })}
                     type="text"
                     placeholder="Enter your answer"
@@ -1049,8 +1067,8 @@ const UserDashboard = () => {
             </Modal.Body>
 
             <Modal.Footer>
-              <Button 
-                variant="secondary" 
+              <Button
+                variant="secondary"
                 onClick={() => {
                   setShowClaimModal(false);
                   claimReset();
@@ -1058,8 +1076,8 @@ const UserDashboard = () => {
               >
                 Cancel
               </Button>
-              <Button 
-                variant="primary" 
+              <Button
+                variant="primary"
                 type="submit"
                 disabled={claimQuestions.length === 0}
               >
