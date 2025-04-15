@@ -283,7 +283,7 @@ const UserDashboard = () => {
       const itemData = {
         itemName: data.name,
         itemDescription: data.description,
-        status: "found",
+        status: data.type,
         category: data.category,
         reportType: data.type,
         location: data.location,
@@ -951,6 +951,7 @@ const UserDashboard = () => {
             variant="outline-primary"
             onClick={addQuestion}
             className="w-100"
+            style={{ backgroundColor: '#1a365d', borderColor: '#1a365d' ,color:"white"}}
           >
             <i className="bi bi-plus-circle me-2"></i>
             Add Another Question
@@ -1167,7 +1168,7 @@ const UserDashboard = () => {
         </Modal.Footer>
       </Modal>
     );
-  };
+  };1 
 
   // Add this function to render claimed items
   const renderClaimedItemCard = (item) => {
@@ -1304,7 +1305,9 @@ const UserDashboard = () => {
         <Row className="mb-4">
           <Col>
             <h1>My Dashboard</h1>
-            <p>Welcome back, {name}!</p>
+            <p>
+              Welcome back,
+            </p>
           </Col>
           <Col xs="auto" className="d-flex gap-2">
             <Button 

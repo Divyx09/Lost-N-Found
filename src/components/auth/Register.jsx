@@ -21,7 +21,6 @@ const Register = () => {
   const onSubmit = async (data) => {
     try {
       setRegisterError("");
-
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: {
@@ -37,7 +36,6 @@ const Register = () => {
 
       const responseData = await response.text();
       console.log(responseData);
-      alert(responseData);
 
       // Simply redirect to login page after successful registration
       navigate("/login", {
