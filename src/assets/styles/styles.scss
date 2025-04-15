@@ -184,10 +184,9 @@ body {
   }
 
   &-outline-primary {
-    border-color: blue;
+    border-color: rgb(15, 15, 42);
     color: black;
-    // background-color: rgb(14, 14, 80);
-    
+    background-color: whitesmoke;
     &:hover {
       background-color: $primary-color;
       color: $light-bg;

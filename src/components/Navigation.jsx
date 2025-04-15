@@ -1,12 +1,14 @@
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const Navigation = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
+    localStorage.clear();
     logout();
     navigate('/login');
   };
@@ -20,7 +22,11 @@ const Navigation = () => {
   };
 
   const role = localStorage.getItem("role");
-  console.log(role)
+  const dashboardPath = role === "ADMIN" ? "/admin/dashboard" : "/user/dashboard";
+  
+  // Check if current path matches the dashboard path
+  const isDashboardActive = location.pathname === dashboardPath;
+  const isProfileActive = location.pathname === '/profile';
 
   return (
     <Navbar 
@@ -51,8 +57,13 @@ const Navigation = () => {
               <>
                 <Nav.Link 
                   as={Link}   
-                  to={role == "ADMIN" ? "/admin/dashboard" : "/user/dashboard"}
-                  className="nav-link-custom mx-2 d-flex align-items-center"
+                  to={dashboardPath}
+                  className={`nav-link-custom mx-2 d-flex align-items-center ${isDashboardActive ? 'active fw-bold' : ''}`}
+                  style={{
+                    backgroundColor: isDashboardActive ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                    borderRadius: '8px',
+                    padding: '8px 16px'
+                  }}
                 >
                   <div className="nav-icon-wrapper me-2">
                     <i className="bi bi-grid-fill"></i>
@@ -60,11 +71,15 @@ const Navigation = () => {
                   Dashboard
                 </Nav.Link>
 
-
                 <Nav.Link 
                   as={Link} 
                   to="/profile"
-                  className="nav-link-custom mx-2 d-flex align-items-center"
+                  className={`nav-link-custom mx-2 d-flex align-items-center ${isProfileActive ? 'active fw-bold' : ''}`}
+                  style={{
+                    backgroundColor: isProfileActive ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                    borderRadius: '8px',
+                    padding: '8px 16px'
+                  }}
                 >
                   <div className="nav-icon-wrapper me-2">
                     <i className="bi bi-person-circle"></i>
@@ -112,4 +127,4 @@ const Navigation = () => {
   );
 };
 
-export default Navigation
+export default Navigation;

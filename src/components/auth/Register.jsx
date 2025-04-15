@@ -21,15 +21,13 @@ const Register = () => {
   const onSubmit = async (data) => {
     try {
       setRegisterError("");
-
-      // Make API call to your localhost endpoint
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username: data.email, // Using email as username
+          username: data.email,
           password: data.password,
           name: data.username,
           role: "USER",
@@ -39,22 +37,10 @@ const Register = () => {
       const responseData = await response.text();
       console.log(responseData);
 
-      // Check if the response indicates user already exists
-      if (responseData === "User exists with the same email") {
-        setRegisterError("A user with this email already exists. Please use a different email or login.");
-        return; // Stop execution here - don't proceed with login/navigation
-      }
-
-      // If registration is successful, proceed with login and navigation
-      const userData = {
-        token: responseData.token,
-        username: data.username,
-        email: data.email,
-        role: "USER",
-      };
-
-      await login(userData);
-      navigate("/login");
+      // Simply redirect to login page after successful registration
+      navigate("/login", {
+        state: { message: "Registration successful! Please login with your credentials." }
+      });
 
     } catch (error) {
       setRegisterError(

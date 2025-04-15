@@ -17,6 +17,7 @@ import { useAuth } from "../context/AuthContext";
 import UserDashboard from "../components/user/UserDashboard";
 import HomePage from "../components/pages/HomePage";
 import UserProfile from "../components/user/UserProfile";
+import MyClaimedItems from "../components/user/MyClaimedItems";
 
 // Wrapper component for public routes
 const PublicRoute = ({ children }) => {
@@ -65,6 +66,14 @@ function AppRouter() {
             }
           />
           <Route
+            path="/user/claimed-items"
+            element={
+              <PrivateRoute>
+                <MyClaimedItems />
+              </PrivateRoute>
+            }
+          />
+          <Route
             path="/reset-password/:token"
             element={
               <PublicRoute>
@@ -103,7 +112,7 @@ function AppRouter() {
           <Route
             path="/admin/dashboard"
             element={
-              <PrivateRoute >
+              <PrivateRoute>
                 <AdminDashboard />
               </PrivateRoute>
             }

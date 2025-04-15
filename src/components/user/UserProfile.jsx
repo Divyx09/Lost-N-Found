@@ -4,59 +4,58 @@ import { useAuth } from "../../context/AuthContext";
 import { useForm } from "react-hook-form";
 
 const UserProfile = () => {
-  const { user } = useAuth();
-  const [message, setMessage] = useState({ type: "", text: "" });
   const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState({ type: "", text: "" });
+  const [profileData, setProfileData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",  // Changed from phoneNumber to phone to match backend
+    address: "",
+    city: "",
+    state: "",
+    department: ""
+  });
 
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    setValue,
+    formState: { errors }
   } = useForm();
 
-  // Load profile data from localStorage on component mount
+  // Load profile data when component mounts
   useEffect(() => {
-    const savedProfile = localStorage.getItem('userProfile');
-    if (savedProfile) {
-      const parsedProfile = JSON.parse(savedProfile);
-      setProfileData(parsedProfile);
-      reset(parsedProfile);
-    }
-    fetchUserProfile();
+    loadProfileData();
   }, []);
 
-  const fetchUserProfile = async () => {
+  const loadProfileData = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:8080/api/user/profile", {
+      const response = await fetch("http://localhost:8080/api/user/get-logged-in-user-details", {
         method: "GET",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch profile");
+        throw new Error("Failed to load profile");
       }
 
       const data = await response.json();
+      console.log("Loaded user data:", data); // Debug log
+      
+      // Use phone instead of phoneNumber
+      setValue("phone", data.phone || "");
+      
       setProfileData(data);
-      reset(data);
-      // Save to localStorage
-      localStorage.setItem('userProfile', JSON.stringify(data));
+      reset(data); // Reset form with loaded data
     } catch (error) {
+      console.error("Error loading profile:", error);
       showMessage("danger", "Failed to load profile data");
-      // Load from localStorage as fallback
-      const savedProfile = localStorage.getItem('userProfile');
-      if (savedProfile) {
-        const parsedProfile = JSON.parse(savedProfile);
-        setProfileData(parsedProfile);
-        reset(parsedProfile);
-      }
     }
   };
 
@@ -65,54 +64,48 @@ const UserProfile = () => {
     setTimeout(() => setMessage({ type: "", text: "" }), 3000);
   };
 
-  const role = localStorage.getItem("role")
+  const { user } = useAuth(); // Use the auth context instead
 
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
       
-      try {
-        // Try to update via API first
-        const response = await fetch("http://localhost:8080/api/user/profile", {
+      const response = await fetch(
+        "http://localhost:8080/api/user/updateUserDetails",
+        {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(data),
-        });
-
-        if (!response.ok) {
-          throw new Error("API update failed");
         }
+      );
 
-        const updatedData = await response.json();
-        setProfileData(updatedData);
-        localStorage.setItem('userProfile', JSON.stringify(updatedData));
-      } catch (apiError) {
-        // If API fails, update localStorage only
-        console.log("API update failed, falling back to localStorage", apiError);
-        const updatedData = {
-          ...profileData,
-          ...data,
-          updatedAt: new Date().toISOString()
-        };
-        setProfileData(updatedData);
-        localStorage.setItem('userProfile', JSON.stringify(updatedData));
+      if (!response.ok) {
+        throw new Error("Failed to update profile");
       }
 
+      const updatedData = await response.json();
+
+      setProfileData(updatedData);
+
+      //display messge to user 
       setIsEditing(false);
       showMessage("success", "Profile updated successfully");
+      alert(updatedData.message);
     } catch (error) {
-      console.error("Profile update error:", error);
       showMessage("danger", "Failed to update profile");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const userdetails = localStorage.getItem("user");
+  // Add this debug useEffect to check form values
+  useEffect(() => {
+    console.log("Current profile data:", profileData);
+  }, [profileData]);
 
   return (
     <Container className="py-5">
@@ -167,20 +160,14 @@ const UserProfile = () => {
                       <Form.Control
                         type="text"
                         {...register("firstName", {
-                          required: "First name is required",
-                          minLength: {
-                            value: 2,
-                            message: "First name must be at least 2 characters"
-                          }
+                          required: "First name is required"
                         })}
                         disabled={!isEditing}
-                        isInvalid={!!errors.firstName}
                         className="py-2 rounded-3 shadow-sm"
                         placeholder="Enter your first name"
                       />
                       {errors.firstName && (
                         <Form.Control.Feedback type="invalid">
-                          <i className="bi bi-exclamation-triangle me-1"></i>
                           {errors.firstName.message}
                         </Form.Control.Feedback>
                       )}
@@ -195,20 +182,14 @@ const UserProfile = () => {
                       <Form.Control
                         type="text"
                         {...register("lastName", {
-                          required: "Last name is required",
-                          minLength: {
-                            value: 2,
-                            message: "Last name must be at least 2 characters"
-                          }
+                          required: "Last name is required"
                         })}
                         disabled={!isEditing}
-                        isInvalid={!!errors.lastName}
                         className="py-2 rounded-3 shadow-sm"
                         placeholder="Enter your last name"
                       />
                       {errors.lastName && (
                         <Form.Control.Feedback type="invalid">
-                          <i className="bi bi-exclamation-triangle me-1"></i>
                           {errors.lastName.message}
                         </Form.Control.Feedback>
                       )}
@@ -225,8 +206,7 @@ const UserProfile = () => {
                     {...register("email")}
                     disabled={true}
                     className="py-2 bg-light rounded-3 shadow-sm"
-                    placeholder={role=="ADMIN" ? "admin@gmail.com" : "sameer.khatri2022@sait.ac.in"}
-                    
+                    placeholder="Your email address"
                   />
                   <Form.Text className="text-muted mt-2 d-block">
                     <i className="bi bi-shield-lock-fill me-1"></i>
@@ -240,22 +220,21 @@ const UserProfile = () => {
                   </Form.Label>
                   <Form.Control
                     type="tel"
-                    {...register("phoneNumber", {
+                    {...register("phone", {  // Changed from phoneNumber to phone
                       required: "Phone number is required",
                       pattern: {
                         value: /^\d{10}$/,
                         message: "Please enter a valid 10-digit phone number"
                       }
                     })}
+                    defaultValue={profileData.phone}  // Changed from phoneNumber to phone
                     disabled={!isEditing}
-                    isInvalid={!!errors.phoneNumber}
-                    className="py-2 rounded-3 shadow-sm"
-                    placeholder="Enter 10-digit phone number"
+                    className={`py-2 rounded-3 shadow-sm ${errors.phone ? 'is-invalid' : ''}`}
+                    placeholder="Enter your phone number"
                   />
-                  {errors.phoneNumber && (
-                    <Form.Control.Feedback type="invalid">
-                      <i className="bi bi-exclamation-triangle me-1"></i>
-                      {errors.phoneNumber.message}
+                  {errors.phone && (  // Changed from phoneNumber to phone
+                    <Form.Control.Feedback type="invalid" className="d-block">
+                      {errors.phone.message}
                     </Form.Control.Feedback>
                   )}
                 </Form.Group>
@@ -275,14 +254,98 @@ const UserProfile = () => {
                       }
                     })}
                     disabled={!isEditing}
-                    isInvalid={!!errors.address}
                     className="py-2 rounded-3 shadow-sm"
                     placeholder="Enter your full address"
                   />
                   {errors.address && (
                     <Form.Control.Feedback type="invalid">
-                      <i className="bi bi-exclamation-triangle me-1"></i>
                       {errors.address.message}
+                    </Form.Control.Feedback>
+                  )}
+                </Form.Group>
+
+                <Row className="mb-4 g-4">
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label className="fw-semibold text-primary">
+                        <i className="bi bi-building-fill me-2"></i>City
+                      </Form.Label>
+                      <Form.Control
+                        type="text"
+                        {...register("city", {
+                          required: "City is required",
+                          minLength: {
+                            value: 2,
+                            message: "City name must be at least 2 characters"
+                          }
+                        })}
+                        disabled={!isEditing}
+                        className="py-2 rounded-3 shadow-sm"
+                        placeholder="Enter your city"
+                      />
+                      {errors.city && (
+                        <Form.Control.Feedback type="invalid">
+                          {errors.city.message}
+                        </Form.Control.Feedback>
+                      )}
+                    </Form.Group>
+                  </Col>
+
+                  <Col md={6}>
+                    <Form.Group>
+                      <Form.Label className="fw-semibold text-primary">
+                        <i className="bi bi-geo-fill me-2"></i>State
+                      </Form.Label>
+                      <Form.Control
+                        type="text"
+                        {...register("state", {
+                          required: "State is required",
+                          minLength: {
+                            value: 2,
+                            message: "State name must be at least 2 characters"
+                          }
+                        })}
+                        disabled={!isEditing}
+                        className="py-2 rounded-3 shadow-sm"
+                        placeholder="Enter your state"
+                      />
+                      {errors.state && (
+                        <Form.Control.Feedback type="invalid">
+                          {errors.state.message}
+                        </Form.Control.Feedback>
+                      )}
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Form.Group className="mb-4">
+                  <Form.Label className="fw-semibold text-primary">
+                    <i className="bi bi-building-fill me-2"></i>Department
+                  </Form.Label>
+                  <Form.Select
+                    disabled={!isEditing}
+                    className="py-2 rounded-3 shadow-sm"
+                    {...register("department")}
+                    onChange={(e) => {
+                      const newValue = e.target.value;
+                      setValue("department", newValue);
+                      setProfileData(prev => ({...prev, department: newValue}));
+                    }}
+                  >
+                    <option value="">Select Department</option>
+                    <option value="CS">Computer Science (CS)</option>
+                    <option value="IT">Information Technology (IT)</option>
+                    <option value="EE">Electrical Engineering (EE)</option>
+                    <option value="EX">Electronics Engineering (EX)</option>
+                    <option value="CIVIL">Civil Engineering</option>
+                    <option value="MECHANICAL">Mechanical Engineering</option>
+                    <option value="CDS">Computing & Data Science (CDS)</option>
+                    <option value="ARENA">Arena Animation</option>
+                    <option value="OTHER">Other</option>
+                  </Form.Select>
+                  {errors.department && (
+                    <Form.Control.Feedback type="invalid">
+                      {errors.department.message}
                     </Form.Control.Feedback>
                   )}
                 </Form.Group>
